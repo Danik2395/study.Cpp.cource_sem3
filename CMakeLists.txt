@@ -16,7 +16,7 @@ set(SOURCES
     boat_calc_base.h
     boat_calc.h
     boat_calc_widget.h
-    # ui/Boat_Calc_ui.ui
+    ui/boat_calc_widget.ui
 )
 
 add_executable(${PROJECT_NAME} WIN32 ${SOURCES})
