@@ -29,7 +29,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineEdit"/>
+        <widget class="QLineEdit" name="edit_first_bs"/>
        </item>
       </layout>
      </item>
@@ -43,7 +43,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineEdit_2"/>
+        <widget class="QLineEdit" name="edit_second_bs"/>
        </item>
       </layout>
      </item>
@@ -57,7 +57,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineEdit_3"/>
+        <widget class="QLineEdit" name="edit_time"/>
        </item>
       </layout>
      </item>
@@ -77,14 +77,14 @@
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="label_4">
+    <widget class="QLabel" name="label_moveaway_speed">
      <property name="text">
       <string>Moveaway speed:</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label_5">
+    <widget class="QLabel" name="label_moveaway_distance">
      <property name="text">
       <string>Moveaway distance:</string>
      </property>
