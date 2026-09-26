@@ -8,6 +8,15 @@ set MINGW_DIR_NAME=mingw1310_64
 set QT_DIR=C:\Qt\%QT_VERSION%\mingw_64
 set COMPILER_DIR=C:\Qt\Tools\%MINGW_DIR_NAME%\bin
 
+if not exist %QT_DIR% (
+    echo "No Qt version %QT_VERSION%."
+    goto error
+)
+if not exist %COMPILER_DIR% (
+    echo "No compiler %MINGW_DIR_NAME%."
+    goto error
+)
+
 rem To not to bump into another compiler in PATH set it in the begining
 set PATH=%COMPILER_DIR%;%PATH%
 
