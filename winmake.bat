@@ -22,7 +22,7 @@ set PATH=%COMPILER_DIR%;%PATH%
 
 rem Has '\'in the end
 set SOURCE_DIR=%~dp0
-set BUILD_DIR=%SOURCE_DIR%build
+set BUILD_DIR=%SOURCE_DIR%build-windows
 set WIN_BIN_RELEASE=%SOURCE_DIR%bin\windows
 
 mkdir %BUILD_DIR%
