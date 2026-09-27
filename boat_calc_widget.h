@@ -5,16 +5,15 @@
 #include <qpushbutton.h>
 #include "ui/ui_boat_calc_widget.h"
 #include "boat_calc.h"
-#include "threaded.h"
 
 namespace Ui { class Boat_Calc_ui; }
 
-class Boat_Calc_Widget : public QWidget, public Threaded<void>
+class Boat_Calc_Widget : public QWidget
 {
     Q_OBJECT
 
     public:
-        explicit Boat_Calc_Widget(QWidget* parent = nullptr) : QWidget(parent), ui(nullptr), Threaded<void>(this)
+        explicit Boat_Calc_Widget(QWidget* parent = nullptr) : QWidget(parent), ui(nullptr)
     {
         ui = new Ui::Boat_Calc_ui;
         ui->setupUi(this);
@@ -34,38 +33,32 @@ class Boat_Calc_Widget : public QWidget, public Threaded<void>
         ui->label_moveaway_speed->setProperty("boat_label_property" ,ui->label_moveaway_speed->text() + " %1");
         ui->label_moveaway_distance->setProperty("boat_label_property" ,ui->label_moveaway_distance->text() + " %1");
 
-        connect_to_thread(
+        connect(
                 ui->edit_first_bs,
                 &QLineEdit::editingFinished,
                 this,
                 [this](){
                 set_boat_speed(Boat_Calc::FIRST);
-                },
-                [this](){
                 update_labels();
                 }
                 );
 
-        connect_to_thread(
+        connect(
                 ui->edit_second_bs,
                 &QLineEdit::editingFinished,
                 this,
                 [this](){
                 set_boat_speed(Boat_Calc::SECOND);
-                },
-                [this](){
                 update_labels();
                 }
                 );
 
-        connect_to_thread(
+        connect(
                 ui->edit_time,
                 &QLineEdit::editingFinished,
                 this,
                 [this](){
                 set_time();
-                },
-                [this](){
                 update_labels();
                 }
                 );
