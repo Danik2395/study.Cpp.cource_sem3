@@ -5,7 +5,7 @@
 #include <type_traits>
 #include <qobject.h>
 
-namespace
+namespace threaded::detail
 {
     template<typename Work, typename WorkRet>
     concept ThreadFunction = std::same_as<std::invoke_result_t<Work>, WorkRet>;
@@ -29,7 +29,7 @@ protected:
         typename Control,
         typename Signal
             >
-    requires ThreadFunction<Work, WorkRet>
+    requires threaded::detail::ThreadFunction<Work, WorkRet>
     void connect_to_thread(Control sender,
                    Signal  signal, Reciever reciever,
                    Work   worker,  Ret      slot)
