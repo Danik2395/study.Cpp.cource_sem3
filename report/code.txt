@@ -1,0 +1,489 @@
+// main.cpp
+#include <QApplication>
+#include "boat_calc_widget.h"
+
+int main(int argc, char* argv[])
+{
+    QApplication app(argc, argv);
+    Boat_Calc_Widget window;
+    window.show();
+    return app.exec();
+}
+
+// boat_calc_base.h
+#pragma once
+#include <cmath>
+#include <algorithm>
+#include <stdexcept>
+
+class Boat_Calc_Base
+{
+public:
+    enum Boat_Num
+    {
+        FIRST = 1,
+        SECOND
+    };
+
+protected:
+    double boat_speed_first  = 0.0;
+    double boat_speed_second = 0.0;
+
+public:
+
+    Boat_Calc_Base() = default;
+
+    Boat_Calc_Base(double first_bs, double second_bs)
+    {
+        set_boat_speed(FIRST, first_bs);
+        set_boat_speed(SECOND, second_bs);
+    }
+
+    virtual ~Boat_Calc_Base() = default;
+
+    void set_boat_speed(Boat_Num num, double val)
+    {
+        if (std::isnan(val))
+        {
+            throw std::invalid_argument("set_boat_speed: NaN is not allowed.");
+        }
+        if (std::isinf(val))
+        {
+            throw std::invalid_argument("set_boat_speed: infinity is not allowed.");
+        }
+
+        double* boat_speed;
+
+        switch (num)
+        {
+            case FIRST:  boat_speed = &boat_speed_first;  break;
+            case SECOND: boat_speed = &boat_speed_second; break;
+            default: throw std::invalid_argument("set_boat_speed: invalid boat number.");
+        }
+
+        *boat_speed = val;
+    }
+
+    double get_boat_speed(Boat_Num num) const
+    {
+        switch (num)
+        {
+            case FIRST:  return boat_speed_first;
+            case SECOND: return boat_speed_second;
+            default: throw std::invalid_argument("set_boat_speed: invalid boat number.");
+        }
+    }
+
+    double get_moveaway_speed() const
+    {
+        bool is_first_speed_positive = boat_speed_first > 0.0;
+        bool is_second_speed_positive = boat_speed_second > 0.0;
+
+        if (is_first_speed_positive == is_second_speed_positive)
+        {
+            return std::max(boat_speed_first, boat_speed_second) - std::min(boat_speed_first, boat_speed_second);
+        }
+        else
+        {
+            return std::abs(boat_speed_first) + std::abs(boat_speed_second);
+        }
+    }
+
+    double calc_moveaway_speed(double first_bs, double second_bs)
+    {
+        set_boat_speed(FIRST, first_bs);
+        set_boat_speed(SECOND, second_bs);
+        return get_moveaway_speed();
+    }
+};
+
+// boat_calc.h
+#pragma once
+#include "boat_calc_base.h"
+#include <cmath>
+#include <algorithm>
+#include <stdexcept>
+
+class Boat_Calc : public Boat_Calc_Base
+{
+protected:
+    double time_hours = 0.0;
+
+    void set_time(double val)
+    {
+        if (std::isnan(val))
+        {
+            throw std::invalid_argument("set_time: NaN is not allowed.");
+        }
+        if (std::isinf(val))
+        {
+            throw std::invalid_argument("set_time: infinity is not allowed.");
+        }
+        if (val < 0.0)
+        {
+            throw std::out_of_range("set_time: time below zero.");
+        }
+
+        time_hours = val;
+    }
+
+public:
+
+    Boat_Calc() = default;
+
+    Boat_Calc(double first_bs, double second_bs) : Boat_Calc_Base(first_bs, second_bs) {}
+
+    Boat_Calc(double first_bs, double second_bs, double time_hr) : Boat_Calc_Base(first_bs, second_bs)
+    {
+        set_time(time_hr);
+    }
+
+    ~Boat_Calc() override = default;
+
+    void set_time_hours(double time) { set_time(time); }
+
+    double get_time_hours() const { return time_hours; }
+
+    double get_moveaway_distance() const
+    {
+        return get_moveaway_speed() * time_hours;
+    }
+
+    double calc_moveaway_distance(double time_hr)
+    {
+        set_time(time_hr);
+        return get_moveaway_distance();
+    }
+};
+
+// boat_calc_widget.h
+#pragma once
+#include <QWidget>
+#include <QLineEdit>
+#include <QDoubleValidator>
+#include <qpushbutton.h>
+#include "ui/ui_boat_calc_widget.h"
+#include "boat_calc.h"
+
+namespace Ui { class Boat_Calc_ui; }
+
+class Boat_Calc_Widget : public QWidget
+{
+    Q_OBJECT
+
+    public:
+        explicit Boat_Calc_Widget(QWidget* parent = nullptr) : QWidget(parent), ui(nullptr)
+    {
+        ui = new Ui::Boat_Calc_ui;
+        ui->setupUi(this);
+
+
+        QDoubleValidator* boat_data_edit_validator = new QDoubleValidator(-9999.9, 9999.9, 5, this);
+        boat_data_edit_validator->setNotation(QDoubleValidator::StandardNotation); // Not 1e5 format
+
+        QLocale boat_data_edit_locale = QLocale::c();
+        boat_data_edit_locale.setNumberOptions(QLocale::RejectGroupSeparator); // Reject 1,000,000 format
+        boat_data_edit_validator->setLocale(boat_data_edit_locale);
+
+        ui->edit_first_bs->setValidator(boat_data_edit_validator);
+        ui->edit_second_bs->setValidator(boat_data_edit_validator);
+        ui->edit_time->setValidator(boat_data_edit_validator);
+
+        ui->label_moveaway_speed->setProperty("boat_label_property" ,ui->label_moveaway_speed->text() + " %1");
+        ui->label_moveaway_distance->setProperty("boat_label_property" ,ui->label_moveaway_distance->text() + " %1");
+
+        connect(
+                ui->edit_first_bs,
+                &QLineEdit::editingFinished,
+                this,
+                [this](){
+                set_boat_speed(Boat_Calc::FIRST);
+                update_labels();
+                }
+                );
+
+        connect(
+                ui->edit_second_bs,
+                &QLineEdit::editingFinished,
+                this,
+                [this](){
+                set_boat_speed(Boat_Calc::SECOND);
+                update_labels();
+                }
+                );
+
+        connect(
+                ui->edit_time,
+                &QLineEdit::editingFinished,
+                this,
+                [this](){
+                set_time();
+                update_labels();
+                }
+                );
+    }
+
+    ~Boat_Calc_Widget() { delete ui; };
+
+private:
+    Ui::Boat_Calc_ui* ui;
+    Boat_Calc boat_calc;
+
+    void set_boat_speed(Boat_Calc::Boat_Num num)
+    {
+        QLineEdit* target_edit;
+
+        switch (num)
+        {
+            case Boat_Calc::FIRST:  target_edit = ui->edit_first_bs;  break;
+            case Boat_Calc::SECOND: target_edit = ui->edit_second_bs; break;
+            default: return;
+        }
+
+        bool ok_double = false;
+        auto text1 = target_edit->text();
+        double boat_speed = target_edit->text().toDouble(&ok_double);
+        if (ok_double)
+        {
+            boat_calc.set_boat_speed(num, boat_speed);
+        }
+    }
+
+    void set_time()
+    {
+        bool ok_double = false;
+        double boat_time = ui->edit_time->text().toDouble(&ok_double);
+        if (ok_double)
+        {
+            boat_calc.set_time_hours(boat_time);
+        }
+    }
+
+    void update_labels()
+    {
+        auto speed_to_set = QString::number(boat_calc.get_moveaway_speed());
+        auto moveaway_speed_property = ui->label_moveaway_speed->property("boat_label_property");
+        ui->label_moveaway_speed->setText(moveaway_speed_property.toString().arg(speed_to_set));
+
+        auto distance_to_set = QString::number(boat_calc.get_moveaway_distance());
+        auto moveaway_distance_property = ui->label_moveaway_distance->property("boat_label_property");
+        ui->label_moveaway_distance->setText(moveaway_distance_property.toString().arg(distance_to_set));
+    }
+};
+
+//winmake.bat
+@echo off
+
+set EXE_NAME=Boat_Calc
+
+set QT_VERSION=6.11.2
+set MINGW_DIR_NAME=mingw1310_64
+
+set QT_DIR=C:\Qt\%QT_VERSION%\mingw_64
+set COMPILER_DIR=C:\Qt\Tools\%MINGW_DIR_NAME%\bin
+
+if not exist %QT_DIR% (
+    echo "No Qt version %QT_VERSION%."
+    goto error
+)
+if not exist %COMPILER_DIR% (
+    echo "No compiler %MINGW_DIR_NAME%."
+    goto error
+)
+
+rem To not to bump into another compiler in PATH set it in the begining
+set PATH=%COMPILER_DIR%;%PATH%
+
+rem Has '\'in the end
+set SOURCE_DIR=%~dp0
+set BUILD_DIR=%SOURCE_DIR%build-windows
+set WIN_BIN_RELEASE=%SOURCE_DIR%bin\windows
+
+mkdir %BUILD_DIR%
+
+cmake -B %BUILD_DIR% -G "MinGW Makefiles" -DCMAKE_PREFIX_PATH="%QT_DIR%" -DCMAKE_BUILD_TYPE=Release
+if %errorlevel% neq 0 goto error
+
+cmake --build %BUILD_DIR% -j 8
+if %errorlevel% neq 0 goto error
+
+mkdir %WIN_BIN_RELEASE%
+
+if exist %BUILD_DIR%\%EXE_NAME%.exe (
+    copy %BUILD_DIR%\%EXE_NAME%.exe %WIN_BIN_RELEASE%
+    "%QT_DIR%\bin\windeployqt.exe" %WIN_BIN_RELEASE%\%EXE_NAME%.exe
+    if %errorlevel% neq 0 goto error
+)
+
+exit \b 0
+
+:error
+exit \b 1
+
+// linuxmake.sh
+#!/bin/bash
+
+exit_error()
+{
+    exit 1
+}
+
+NAME=Boat_Calc
+
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/." &> /dev/null && pwd -P)
+BUILD_DIR="${SCRIPT_DIR}"/build-linux
+LINUX_RELEASE_DIR="${SCRIPT_DIR}"/bin/linux
+
+mkdir "${BUILD_DIR}"
+
+cmake -B "${BUILD_DIR}" -DCMAKE_BUILD_TYPE=Release || exit_error
+
+cmake --build "${BUILD_DIR}" -j 8 || exit_error
+
+if [[ -e "${BUILD_DIR}"/${NAME} ]]; then
+    mkdir -p "${LINUX_RELEASE_DIR}"
+    cp "${BUILD_DIR}"/${NAME} "${LINUX_RELEASE_DIR}"
+fi
+
+// boat_calc_widget.ui
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Boat_Calc_ui</class>
+ <widget class="QWidget" name="Boat_Calc_ui">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>517</width>
+    <height>306</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Boat Calculator</string>
+  </property>
+  <property name="windowIcon">
+   <iconset theme="QIcon::ThemeIcon::DocumentProperties"/>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_4">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>First boat speed (km/h)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="edit_first_bs"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Second boat speed (km/h)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="edit_second_bs"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Moveaway time (hours)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="edit_time"/>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Orientation::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_moveaway_speed">
+     <property name="text">
+      <string>Moveaway speed:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_moveaway_distance">
+     <property name="text">
+      <string>Moveaway distance:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Orientation::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
+
+// CMakeLists.txt
+cmake_minimum_required(VERSION 3.16)
+project(Boat_Calc VERSION 1.0 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Concurrent)
+
+set(SOURCES
+    main.cpp
+    boat_calc_base.h
+    boat_calc.h
+    boat_calc_widget.h
+    ui/boat_calc_widget.ui
+)
+
+add_executable(${PROJECT_NAME} WIN32 ${SOURCES})
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
+    Qt6::Concurrent
+)
