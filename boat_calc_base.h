@@ -57,7 +57,7 @@ public:
         {
             case FIRST:  return boat_speed_first;
             case SECOND: return boat_speed_second;
-            default: throw std::invalid_argument("set_boat_speed: invalid boat number.");
+            default: throw std::invalid_argument("get_boat_speed: invalid boat number.");
         }
     }
 
