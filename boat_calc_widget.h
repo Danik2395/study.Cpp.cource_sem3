@@ -19,16 +19,20 @@ class Boat_Calc_Widget : public QWidget
         ui->setupUi(this);
 
 
-        QDoubleValidator* boat_data_edit_validator = new QDoubleValidator(-9999.9, 9999.9, 5, this);
-        boat_data_edit_validator->setNotation(QDoubleValidator::StandardNotation); // Not 1e5 format
+        QDoubleValidator* boat_speed_edit_validator = new QDoubleValidator(-9999.9, 9999.9, 5, this);
+        boat_speed_edit_validator->setNotation(QDoubleValidator::StandardNotation); // Not 1e5 format
+
+        QDoubleValidator* moveaway_time_edit_validator = new QDoubleValidator(0.0, 9999.9, 5, this);
+        moveaway_time_edit_validator->setNotation(QDoubleValidator::StandardNotation);
 
         QLocale boat_data_edit_locale = QLocale::c();
         boat_data_edit_locale.setNumberOptions(QLocale::RejectGroupSeparator); // Reject 1,000,000 format
-        boat_data_edit_validator->setLocale(boat_data_edit_locale);
+        boat_speed_edit_validator->setLocale(boat_data_edit_locale);
+        moveaway_time_edit_validator->setLocale(boat_data_edit_locale);
 
-        ui->edit_first_bs->setValidator(boat_data_edit_validator);
-        ui->edit_second_bs->setValidator(boat_data_edit_validator);
-        ui->edit_time->setValidator(boat_data_edit_validator);
+        ui->edit_first_bs->setValidator(boat_speed_edit_validator);
+        ui->edit_second_bs->setValidator(boat_speed_edit_validator);
+        ui->edit_time->setValidator(moveaway_time_edit_validator);
 
         ui->label_moveaway_speed->setProperty("boat_label_property" ,ui->label_moveaway_speed->text() + " %1");
         ui->label_moveaway_distance->setProperty("boat_label_property" ,ui->label_moveaway_distance->text() + " %1");
