@@ -53,8 +53,11 @@ class Boat_Calc_Widget : public QWidget
         ui->edit_second_bs->setValidator(boat_speed_edit_validator);
         ui->edit_time->setValidator(moveaway_time_edit_validator);
 
-        ui->label_moveaway_speed->setProperty("boat_label_property" ,ui->label_moveaway_speed->text() + " %1");
-        ui->label_moveaway_distance->setProperty("boat_label_property" ,ui->label_moveaway_distance->text() + " %1");
+        ui->label_moveaway_speed->setProperty("boat_label_value" ,ui->label_moveaway_speed->text() + " %1 " + "km/h");
+        ui->label_moveaway_distance->setProperty("boat_label_value" ,ui->label_moveaway_distance->text() + " %1 " + "km");
+
+        ui->label_moveaway_speed->setProperty("boat_label_empty" ,ui->label_moveaway_speed->text());
+        ui->label_moveaway_distance->setProperty("boat_label_empty" ,ui->label_moveaway_distance->text());
 
         connect(
                 ui->edit_first_bs,
@@ -135,12 +138,30 @@ private:
 
     void update_labels()
     {
-        auto speed_to_set = QString::number(boat_calc.get_moveaway_speed());
-        auto moveaway_speed_property = ui->label_moveaway_speed->property("boat_label_property");
-        ui->label_moveaway_speed->setText(moveaway_speed_property.toString().arg(speed_to_set));
+        auto set_propertied_label_text = [](
+                QLabel* target_label,
+                double target_value,
+                bool equivalent_edit_empty
+                ) -> QString {
+            if (target_value == 0.0 && equivalent_edit_empty) // Possible because of hardcoded zero set and validator limits are big
+            {
+                return target_label->property("boat_label_empty").toString();
+            }
 
-        auto distance_to_set = QString::number(boat_calc.get_moveaway_distance());
-        auto moveaway_distance_property = ui->label_moveaway_distance->property("boat_label_property");
-        ui->label_moveaway_distance->setText(moveaway_distance_property.toString().arg(distance_to_set));
+            auto speed_to_set = QString::number(target_value);
+            auto moveaway_speed_property = target_label->property("boat_label_value");
+            return moveaway_speed_property.toString().arg(speed_to_set);
+        };
+
+        double speed_value = boat_calc.get_moveaway_speed();
+        bool is_speed_edit_empty = ui->edit_first_bs->text().isEmpty() || ui->edit_second_bs->text().isEmpty();
+        QString moveaway_speed_text = set_propertied_label_text(ui->label_moveaway_speed, speed_value, is_speed_edit_empty);
+
+        double distance_value = boat_calc.get_moveaway_distance();
+        bool is_time_edit_empty = ui->edit_time->text().isEmpty();
+        QString moveaway_distance_text = set_propertied_label_text(ui->label_moveaway_distance, distance_value, is_time_edit_empty);
+
+        ui->label_moveaway_speed->setText(moveaway_speed_text);
+        ui->label_moveaway_distance->setText(moveaway_distance_text);
     }
 };
