@@ -86,7 +86,6 @@ private:
         }
 
         bool ok_double = false;
-        auto text1 = target_edit->text();
         double boat_speed = target_edit->text().toDouble(&ok_double);
         if (ok_double)
         {
