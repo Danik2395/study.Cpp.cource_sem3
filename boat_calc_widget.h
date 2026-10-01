@@ -8,6 +8,25 @@
 
 namespace Ui { class Boat_Calc_ui; }
 
+namespace Calc_Widget_detail
+{
+class Boat_Edit_Validator : public QDoubleValidator
+{
+    Q_OBJECT
+
+    public:
+        using QDoubleValidator::QDoubleValidator;
+
+        State validate(QString &input, int &pos) const override
+        {
+            if (input.isEmpty()) {
+                return QValidator::Acceptable;
+            }
+            return QDoubleValidator::validate(input, pos);
+        }
+};
+}
+
 class Boat_Calc_Widget : public QWidget
 {
     Q_OBJECT
@@ -19,10 +38,10 @@ class Boat_Calc_Widget : public QWidget
         ui->setupUi(this);
 
 
-        QDoubleValidator* boat_speed_edit_validator = new QDoubleValidator(-9999.9, 9999.9, 5, this);
+        auto boat_speed_edit_validator = new Calc_Widget_detail::Boat_Edit_Validator(-9999.9, 9999.9, 5, this);
         boat_speed_edit_validator->setNotation(QDoubleValidator::StandardNotation); // Not 1e5 format
 
-        QDoubleValidator* moveaway_time_edit_validator = new QDoubleValidator(0.0, 9999.9, 5, this);
+        auto moveaway_time_edit_validator = new Calc_Widget_detail::Boat_Edit_Validator(0.0, 9999.9, 5, this);
         moveaway_time_edit_validator->setNotation(QDoubleValidator::StandardNotation);
 
         QLocale boat_data_edit_locale = QLocale::c();
@@ -85,6 +104,12 @@ private:
             default: return;
         }
 
+        if (target_edit->text().isEmpty())
+        {
+            boat_calc.set_boat_speed(num, 0);
+            return;
+        }
+
         bool ok_double = false;
         double boat_speed = target_edit->text().toDouble(&ok_double);
         if (ok_double)
@@ -95,6 +120,11 @@ private:
 
     void set_time()
     {
+        if (ui->edit_time->text().isEmpty())
+        {
+            boat_calc.set_time_hours(0.0);
+            return;
+        }
         bool ok_double = false;
         double boat_time = ui->edit_time->text().toDouble(&ok_double);
         if (ok_double)
