@@ -17,6 +17,7 @@ set(SOURCES
     boat_calc.h
     boat_calc_widget.h
     ui/boat_calc_widget.ui
+    resources.qrc
 )
 
 add_executable(${PROJECT_NAME} WIN32 ${SOURCES})

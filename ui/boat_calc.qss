@@ -1,0 +1,119 @@
+/* ==========================================================
+   Boat Calculator — "River" theme
+   Font:    Nunito (fallbacks: Segoe UI, sans-serif)
+   Palette: #354db0 river blue (base)
+            #24336e deep water  — the ONLY text colour
+            #9fb0ea shallow     — borders hover / placeholder
+            #dfe5f7 foam        — light blue accents
+            #fbfaf6 milk        — field fill
+            #f8f7f3 paper       — window background (near-white)
+   ========================================================== */
+
+/* ---------- base ---------- */
+QWidget#Boat_Calc_ui {
+    background-color: #f8f7f3;   /* remove this line to keep the system background */
+}
+
+QLabel {
+    background: transparent;
+    color: #24336e;
+    font-family: "Nunito", "Segoe UI", sans-serif;
+}
+
+/* ---------- header ---------- */
+QLabel#label_title {
+    font-size: 32px;
+    font-weight: 800;
+}
+
+QLabel#label_subtitle {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* ---------- cards ("water surface") ---------- */
+QFrame#card_inputs,
+QFrame#card_result {
+    background-color: rgba(255, 255, 255, 170);
+    border: 1px solid #d5dcf2;
+    border-radius: 22px;
+}
+
+/* ---------- input captions ---------- */
+QLabel#label_first_bs,
+QLabel#label_second_bs,
+QLabel#label_time {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* ---------- line edits ---------- */
+QLineEdit {
+    background-color: #fbfaf6;
+    color: #24336e;
+    border: 2px solid #c9d3f0;
+    border-radius: 16px;
+    padding: 0px 16px;
+    font-family: "Nunito", "Segoe UI", sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    selection-background-color: #354db0;
+    selection-color: #fbfaf6;
+    placeholder-text-color: #9fb0ea;
+}
+
+QLineEdit:hover {
+    border-color: #9fb0ea;
+}
+
+QLineEdit:focus {
+    background-color: #ffffff;
+    border-color: #354db0;
+}
+
+/* ---------- results ---------- */
+QLabel#label_moveaway_speed,
+QLabel#label_moveaway_distance {
+    font-size: 26px;
+    font-weight: 700;
+}
+
+/* ---------- decor: current lines (fade in / fade out) ---------- */
+QFrame#decor_current_top,
+QFrame#decor_current_mid {
+    border: none;
+    border-radius: 2px;
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0,
+        stop: 0   rgba(53, 77, 176, 0),
+        stop: 0.5 rgba(53, 77, 176, 150),
+        stop: 1   rgba(53, 77, 176, 0));
+}
+
+/* ---------- decor: vertical accent of the result card ---------- */
+QFrame#decor_current_accent {
+    border: none;
+    border-radius: 3px;
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+        stop: 0 #354db0,
+        stop: 1 #9fb0ea);
+}
+
+/* ---------- decor: boat (cabin + hull) ---------- */
+QFrame#decor_boat_cabin {
+    background-color: #dfe5f7;
+    border: 2px solid #354db0;
+    border-bottom: none;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+QFrame#decor_boat_hull {
+    background-color: #354db0;
+    border: none;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+}

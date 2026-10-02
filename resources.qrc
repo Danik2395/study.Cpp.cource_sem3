@@ -1,0 +1,11 @@
+<RCC>
+  <qresource prefix="logo">
+    <file>ui/logo.jpg</file>
+  </qresource>
+  <qresource prefix="fonts">
+    <file>ui/Nunito-VariableFont_wght.ttf</file>
+  </qresource>
+  <qresource prefix="styles">
+    <file>ui/boat_calc.qss</file>
+  </qresource>
+</RCC>
