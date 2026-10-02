@@ -14,7 +14,8 @@
    <string>Boat Calculator</string>
   </property>
   <property name="windowIcon">
-   <iconset theme="QIcon::ThemeIcon::DocumentProperties"/>
+   <iconset resource="assets.qrc">
+    <normaloff>:/logo/logo.jpg</normaloff>:/logo/logo.jpg</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_4">
    <item>
@@ -105,6 +106,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="assets.qrc"/>
+ </resources>
  <connections/>
 </ui>
